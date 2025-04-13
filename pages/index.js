@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import Image from "next/image";
 
 const contractABI = [
   {
@@ -79,22 +80,30 @@ export default function ClickToTxDApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
-      <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
-        Dapp Tea Protocol
-      </h1>
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-blue-400 p-6">
+      <div className="flex flex-col items-center space-y-2 mt-4 mb-8">
+        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
+          Dapp Tea Protocol
+        </h1>
+        {walletAddress && (
+          <p className="text-green-300 text-sm">Connected: {walletAddress}</p>
+        )}
+      </div>
 
-      <div className="flex flex-col items-center space-y-4 mt-6">
+      <div className="flex flex-col items-center space-y-4">
         {walletAddress ? (
           <>
-            <p className="text-green-300 text-sm">Connected: {walletAddress}</p>
-            <button
+                 <button
               onClick={handleClickTx}
               className="w-[200px] h-[200px] bg-blue-500 hover:bg-blue-600 rounded-full text-white text-2xl font-bold shadow-xl flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "..." : "★"}
+              {isLoading ? "..." : "Let'go"}
             </button>
+            {txHash && (
+              <p className="mt-2 text-sm text-green-400">
+                TX Hash: <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" className="underline">{txHash}</a>
+              </p>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
                 TX Hash: <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" className="underline">{txHash}</a>
@@ -106,7 +115,7 @@ export default function ClickToTxDApp() {
             onClick={connectWallet}
             className="bg-green-500 text-black font-semibold text-lg px-8 py-4 rounded-2xl hover:bg-green-400 shadow-lg shadow-green-300"
           >
-            Connect Wallet (MetaMask, Rabby, OKX...)
+            Connect Wallet
           </button>
         )}
       </div>
