@@ -93,7 +93,7 @@ export default function ClickToTxDApp() {
         </button>
 
         <a
-          href="https://sepolia.faucet.tea.xyz"
+          href="https://faucet-sepolia.tea.xyz/"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-purple-600 px-6 py-3 rounded-xl hover:bg-purple-500 text-white shadow-md"
