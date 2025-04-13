@@ -115,7 +115,7 @@ export default function ClickToTxDApp() {
           onClick={connectWallet}
           className="bg-green-500 text-black font-semibold text-lg px-8 py-4 rounded-2xl hover:bg-green-400 shadow-lg shadow-green-300"
         >
-          Connect Wallet (MetaMask, Rabby, OKX...)
+          Connect Wallet
         </button>
       )}
     </div>
