@@ -12,8 +12,7 @@ const contractABI = [
   }
 ];
 
-// Smart contract address ที่ deploy จริง
-const contractAddress = "0x5f81f2fbdE2B98Ab0F9c0C4d6CC15e8380B88686";
+const contractAddress = "0x5f81f2fbde2b98ab0f9c0c4d6cc15e83b08b868";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
@@ -48,7 +47,7 @@ export default function ClickToTxDApp() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0xaa37ec", // Tea Sepolia Chain ID
+            chainId: "0xaa37ec", // Tea Sepolia 
             chainName: "Tea Sepolia",
             nativeCurrency: {
               name: "TEA",
