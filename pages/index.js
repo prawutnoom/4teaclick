@@ -12,7 +12,7 @@ const contractABI = [
   }
 ];
 
-// Mock contract address
+// Smart contract address ที่ deploy จริง
 const contractAddress = "0x5f81f2fbdE2B98Ab0F9c0C4d6CC15e8380B88686";
 
 export default function ClickToTxDApp() {
@@ -23,8 +23,8 @@ export default function ClickToTxDApp() {
   const [txHash, setTxHash] = useState(null);
 
   useEffect(() => {
-    if (typeof window.ethereum !== "undefined") {
-      const web3Provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+    if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(web3Provider);
     }
   }, []);
