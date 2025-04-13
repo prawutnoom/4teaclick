@@ -5,7 +5,7 @@ import Image from "next/image";
 const contractABI = [
   {
     "inputs": [],
-    "name": "claim",
+    "name": "click",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
