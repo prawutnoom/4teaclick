@@ -66,19 +66,30 @@ export default function ClickToTxDApp() {
   };
 
   const handleClickTx = async () => {
-    if (!signer) return;
-    setIsLoading(true);
-    try {
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
-      const tx = await contract.claim();
-      await tx.wait();
-      setTxHash(tx.hash);
-    } catch (err) {
-      console.error("Transaction error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!signer) {
+    console.log("❌ ยังไม่มี signer");
+    return;
+  }
+
+  console.log("✅ signer พร้อม:", signer);
+
+  setIsLoading(true);
+  try {
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+    console.log("🚀 เรียก contract.claim()");
+
+    const tx = await contract.claim();
+    await tx.wait();
+
+    console.log("✅ TX สำเร็จ:", tx.hash);
+    setTxHash(tx.hash);
+  } catch (err) {
+    console.error("❌ Transaction error:", err);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
