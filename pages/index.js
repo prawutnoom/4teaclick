@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import Image from "next/image";
 
-// Mock ABI สำหรับฟังก์ชัน claim
 const contractABI = [
   {
     "inputs": [],
@@ -12,9 +12,7 @@ const contractABI = [
   }
 ];
 
-// Smart contract address ที่ deploy จริง
-const contractAddress = "0xe6953846b68cbab4cf4280e506f0099e2261048e";
-
+const contractAddress = "0x8D3d6222eB91D4aF798fd536301A77926c286388"; 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -48,7 +46,7 @@ export default function ClickToTxDApp() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0xaa37ec", // Tea Sepolia Chain ID
+            chainId: "0xaa37ec",
             chainName: "Tea Sepolia",
             nativeCurrency: {
               name: "TEA",
@@ -82,7 +80,9 @@ export default function ClickToTxDApp() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
-      <h1 className="text-4xl font-bold text-blue-300 drop-shadow-lg">มึงจะคลิกหรือไม่คลิก</h1>
+      <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
+        Dapp Tea Protocol
+      </h1>
 
       <div className="flex flex-col items-center space-y-4 mt-6">
         {walletAddress ? (
@@ -90,10 +90,16 @@ export default function ClickToTxDApp() {
             <p className="text-green-300 text-sm">Connected: {walletAddress}</p>
             <button
               onClick={handleClickTx}
-              className="bg-blue-600 px-10 py-5 rounded-2xl hover:bg-blue-500 disabled:opacity-50 shadow-blue-400 shadow-md text-lg"
+              className="rounded-full focus:outline-none"
               disabled={isLoading}
             >
-              {isLoading ? "Claiming..." : "Click"}
+              <Image
+                src="/star.png"
+                alt="Claim Star"
+                width={700}
+                height={700}
+                className="hover:opacity-90 transition duration-300"
+              />
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
@@ -106,12 +112,11 @@ export default function ClickToTxDApp() {
             onClick={connectWallet}
             className="bg-green-500 text-black font-semibold text-lg px-8 py-4 rounded-2xl hover:bg-green-400 shadow-lg shadow-green-300"
           >
-            Connect Wallet
+            Connect Wallet (MetaMask, Rabby, OKX...)
           </button>
         )}
       </div>
 
-      {/* ปุ่ม Add Chain และ Get TEA ไปไว้ล่างสุดตรงกลาง */}
       <div className="fixed bottom-6 flex justify-center w-full gap-4">
         <button
           onClick={addTeaSepoliaNetwork}
