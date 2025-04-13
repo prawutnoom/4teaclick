@@ -12,7 +12,7 @@ const contractABI = [
   }
 ];
 
-const contractAddress = "0x8D3d6222eB91D4aF798fd536301A77926c286388";
+const contractAddress = "0xbcd9d74cf1b63f168de313afd1b86ca12b23438c";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
