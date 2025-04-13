@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import Image from "next/image";
 
 const contractABI = [
   {
@@ -12,7 +11,8 @@ const contractABI = [
   }
 ];
 
-const contractAddress = "0x8D3d6222eB91D4aF798fd536301A77926c286388"; 
+const contractAddress = "0x8D3d6222eB91D4aF798fd536301A77926c286388";
+
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -90,16 +90,10 @@ export default function ClickToTxDApp() {
             <p className="text-green-300 text-sm">Connected: {walletAddress}</p>
             <button
               onClick={handleClickTx}
-              className="rounded-full focus:outline-none"
+              className="w-[200px] h-[200px] bg-blue-500 hover:bg-blue-600 rounded-full text-white text-2xl font-bold shadow-xl flex items-center justify-center"
               disabled={isLoading}
             >
-              <Image
-                src="/star.png"
-                alt="Claim Star"
-                width={700}
-                height={700}
-                className="hover:opacity-90 transition duration-300"
-              />
+              {isLoading ? "..." : "★"}
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
