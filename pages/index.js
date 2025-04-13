@@ -12,7 +12,8 @@ const contractABI = [
   }
 ];
 
-const contractAddress = "0x7ebf3911c41237aebe337ca796ed432875792d6d";
+// Smart contract address ที่ deploy จริง
+const contractAddress = "0xe6953846b68cbab4cf4280e506f0099e2261048e";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
@@ -47,7 +48,7 @@ export default function ClickToTxDApp() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0xaa37ec", // Tea Sepolia 
+            chainId: "0xaa37ec", // Tea Sepolia Chain ID
             chainName: "Tea Sepolia",
             nativeCurrency: {
               name: "TEA",
@@ -65,54 +66,25 @@ export default function ClickToTxDApp() {
   };
 
   const handleClickTx = async () => {
-  if (!signer) {
-    console.log("❌ ยังไม่มี signer");
-    return;
-  }
-
-  console.log("✅ signer พร้อม:", signer);
-
-  setIsLoading(true);
-  try {
-    const contract = new ethers.Contract(contractAddress, contractABI, signer);
-    console.log("🚀 เรียก contract.claim()");
-
-    const tx = await contract.claim();
-    await tx.wait();
-
-    console.log("✅ TX สำเร็จ:", tx.hash);
-    setTxHash(tx.hash);
-  } catch (err) {
-    console.error("❌ Transaction error:", err);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+    if (!signer) return;
+    setIsLoading(true);
+    try {
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+      const tx = await contract.claim();
+      await tx.wait();
+      setTxHash(tx.hash);
+    } catch (err) {
+      console.error("Transaction error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
-      <h1 className="text-4xl font-bold text-blue-300 drop-shadow-lg">Claim Reward</h1>
+      <h1 className="text-4xl font-bold text-blue-300 drop-shadow-lg">มึงจะคลิกหรือไม่คลิก</h1>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <button
-          onClick={addTeaSepoliaNetwork}
-          className="bg-yellow-500 px-6 py-3 rounded-xl hover:bg-yellow-400 text-black shadow-md"
-        >
-          คลิกเพื่อแอดเชน Tea Sepolia
-        </button>
-
-        <a
-          href="https://sepolia.faucet.tea.xyz"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-purple-600 px-6 py-3 rounded-xl hover:bg-purple-500 text-white shadow-md"
-        >
-          Get TEA
-        </a>
-      </div>
-
-      <div className="flex flex-col items-center space-y-4 mt-8">
+      <div className="flex flex-col items-center space-y-4 mt-6">
         {walletAddress ? (
           <>
             <p className="text-green-300 text-sm">Connected: {walletAddress}</p>
@@ -121,7 +93,7 @@ export default function ClickToTxDApp() {
               className="bg-blue-600 px-10 py-5 rounded-2xl hover:bg-blue-500 disabled:opacity-50 shadow-blue-400 shadow-md text-lg"
               disabled={isLoading}
             >
-              {isLoading ? "Claiming..." : "Click to Claim"}
+              {isLoading ? "Claiming..." : "Click"}
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
@@ -134,9 +106,28 @@ export default function ClickToTxDApp() {
             onClick={connectWallet}
             className="bg-green-500 text-black font-semibold text-lg px-8 py-4 rounded-2xl hover:bg-green-400 shadow-lg shadow-green-300"
           >
-            Connect Wallet (MetaMask, Rabby, OKX...)
+            Connect Wallet
           </button>
         )}
+      </div>
+
+      {/* ปุ่ม Add Chain และ Get TEA ไปไว้ล่างสุดตรงกลาง */}
+      <div className="fixed bottom-6 flex justify-center w-full gap-4">
+        <button
+          onClick={addTeaSepoliaNetwork}
+          className="bg-yellow-500 text-black text-sm px-4 py-2 rounded-xl hover:bg-yellow-400 shadow-md"
+        >
+          Add Chain Tea Sepolia
+        </button>
+
+        <a
+          href="https://sepolia.faucet.tea.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-purple-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-purple-500 shadow-md"
+        >
+          Get TEA
+        </a>
       </div>
     </div>
   );
