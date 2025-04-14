@@ -149,9 +149,9 @@ export default function ClickToTxDApp() {
 
         {txHash && (
           <p className="mt-2 text-sm text-blue-300 drop-shadow-[0_0_10px_#00ffe0]">
-            TX: {" "}
+            TX:{" "}
             <a
-              href={https://sepolia.tea.xyz/tx/${txHash}}
+              href={`https://sepolia.tea.xyz/tx/${txHash}`}
               target="_blank"
               rel="noreferrer"
               className="underline"
@@ -187,12 +187,11 @@ function HeroSection() {
     <div className="flex flex-col items-center">
       <Image
         src="/welcome.png"
-        alt="Click Logo"
+        alt="Welcome"
         width={500}
         height={200}
-        className="rounded-xl shadow-2xl"
+        className="mb-4 drop-shadow-[0_0_15px_#00ffe0]"
       />
-      <h1 className="text-white text-4xl font-bold mt-4 drop-shadow-[0_0_10px_#00ffe0]">Click DApp</h1>
     </div>
   );
-}  
+}
