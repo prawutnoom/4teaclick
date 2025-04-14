@@ -108,56 +108,52 @@ export default function ClickToTxDApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-center text-white p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-start text-white px-6 pt-10 space-y-6">
       <HeroSection />
 
-      <h1 className="text-4xl font-bold drop-shadow-lg text-center">Tea Protocol DApp</h1>
+      <h1 className="text-4xl font-bold text-white">Tea Protocol DApp</h1>
 
-      <div className="flex flex-col items-center space-y-4">
-        {walletAddress ? (
-          <>
-            <p className="text-green-400 text-sm">Connected: {walletAddress}</p>
+      {walletAddress && (
+        <p className="text-green-400 text-sm text-center break-all">
+          Connected: {walletAddress}
+        </p>
+      )}
 
-            <button
-              onClick={handleClickTx}
-              className="relative w-48 h-48 rounded-full overflow-hidden shadow-lg flex items-center justify-center"
-              disabled={isLoading}
-            >
-              <Image
-                src="/click.png"
-                alt="Tea Click"
-                fill
-                className="object-cover"
-              />
-              <span className="absolute text-white font-bold text-xl">
-                {isLoading ? "..." : "CLICK"}
-              </span>
-            </button>
-
-            {txHash && (
-              <p className="mt-2 text-sm text-blue-300">
-                TX:{" "}
-                <a
-                  href={`https://sepolia.tea.xyz/tx/${txHash}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline"
-                >
-                  {txHash}
-                </a>
-              </p>
-            )}
-          </>
-        ) : (
+      <div className="flex flex-col items-center justify-center mt-6 mb-12">
+        {walletAddress && (
           <button
-            onClick={connectWallet}
-            className="bg-green-500 text-black px-6 py-3 rounded-xl text-lg font-semibold hover:bg-green-400"
+            onClick={handleClickTx}
+            className="relative w-52 h-52 rounded-full overflow-hidden shadow-xl flex items-center justify-center hover:scale-105 transition-transform duration-300"
+            disabled={isLoading}
           >
-            Connect Wallet
+            <Image
+              src="/click.png"
+              alt="Tea Click"
+              fill
+              className="object-cover"
+            />
+            <span className="absolute text-white font-extrabold text-3xl tracking-wider drop-shadow-[0_0_8px_#00ffcc]">
+              {isLoading ? "..." : "CLICK"}
+            </span>
           </button>
+        )}
+
+        {txHash && (
+          <p className="mt-2 text-sm text-blue-300">
+            TX:{" "}
+            <a
+              href={`https://sepolia.tea.xyz/tx/${txHash}`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              {txHash}
+            </a>
+          </p>
         )}
       </div>
 
+      {/* Bottom Buttons */}
       <div className="fixed bottom-6 flex gap-4 justify-center">
         <button
           onClick={addTeaSepoliaNetwork}
