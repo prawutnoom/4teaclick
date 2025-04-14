@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import Image from "next/image";
 
 const contractABI = [
   {
@@ -25,7 +26,7 @@ const contractABI = [
 ];
 
 const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
-const RPC = "https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t"; // ใส่ของคุณแทน
+const RPC = "https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
@@ -33,8 +34,6 @@ export default function ClickToTxDApp() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
-  const [userClickCount, setUserClickCount] = useState(0);
-  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
@@ -42,38 +41,6 @@ export default function ClickToTxDApp() {
       setProvider(web3Provider);
     }
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [intervalId]);
-
-  const fetchUserClickCount = async (userAddress) => {
-    if (!userAddress) return;
-
-    const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
-    const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
-
-    try {
-      const latestBlock = await rpcProvider.getBlockNumber();
-      const fromBlock = Math.max(latestBlock - 5000, 0);
-
-      const logs = await contract.queryFilter("Claimed", fromBlock, "latest");
-
-      console.log("🧾 logs.length =", logs.length);
-
-      const userLogs = logs.filter(
-        (log) => log.args.user.toLowerCase() === userAddress.toLowerCase()
-      );
-
-      console.log("🙋‍♂️ userLogs.length =", userLogs.length);
-
-      setUserClickCount(userLogs.length);
-    } catch (err) {
-      console.error("❌ Error fetching click count:", err);
-    }
-  };
 
   const connectWallet = async () => {
     try {
@@ -97,13 +64,6 @@ export default function ClickToTxDApp() {
           console.error("❌ Switch chain error:", switchError);
         }
       }
-
-      fetchUserClickCount(address);
-
-      const id = setInterval(() => {
-        fetchUserClickCount(address);
-      }, 15000);
-      setIntervalId(id);
     } catch (err) {
       console.error("Wallet connection error:", err);
     }
@@ -140,7 +100,6 @@ export default function ClickToTxDApp() {
       const tx = await contract.claim();
       await tx.wait();
       setTxHash(tx.hash);
-      fetchUserClickCount(walletAddress);
     } catch (err) {
       console.error("❌ Transaction error:", err);
     } finally {
@@ -149,33 +108,31 @@ export default function ClickToTxDApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
-      {walletAddress && (
-        <>
-          <p className="text-green-300 text-sm mb-2">Connected: {walletAddress}</p>
-          <p className="text-sm text-white">
-            Your Clicks: <span className="text-cyan-300 font-semibold">{userClickCount}</span>
-          </p>
-        </>
-      )}
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-center text-white p-6 space-y-8">
+      <Image
+        src="/logo.png"
+        alt="Tea Protocol Logo"
+        width={150}
+        height={150}
+        className="rounded-3xl shadow-lg"
+      />
 
-      <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
-        Dapp Tea Protocol
-      </h1>
+      <h1 className="text-4xl font-bold drop-shadow-lg text-center">Tea Protocol DApp</h1>
 
-      <div className="flex flex-col items-center space-y-4 mt-6">
+      <div className="flex flex-col items-center space-y-4">
         {walletAddress ? (
           <>
+            <p className="text-green-400 text-sm">Connected: {walletAddress}</p>
             <button
               onClick={handleClickTx}
-              className="w-[200px] h-[200px] bg-blue-500 hover:bg-blue-600 rounded-full text-white text-2xl font-bold shadow-xl flex items-center justify-center"
+              className="w-48 h-48 bg-teal-500 hover:bg-teal-600 rounded-full text-xl font-bold shadow-lg flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "..." : "Let’s go"}
+              {isLoading ? "..." : "CLICK"}
             </button>
             {txHash && (
-              <p className="mt-2 text-sm text-green-400">
-                TX Hash:{" "}
+              <p className="mt-2 text-sm text-blue-300">
+                TX:{" "}
                 <a
                   href={`https://sepolia.tea.xyz/tx/${txHash}`}
                   target="_blank"
@@ -190,26 +147,25 @@ export default function ClickToTxDApp() {
         ) : (
           <button
             onClick={connectWallet}
-            className="bg-green-500 text-black font-semibold text-lg px-8 py-4 rounded-2xl hover:bg-green-400 shadow-lg shadow-green-300"
+            className="bg-green-500 text-black px-6 py-3 rounded-xl text-lg font-semibold hover:bg-green-400"
           >
             Connect Wallet
           </button>
         )}
       </div>
 
-      <div className="fixed bottom-6 flex justify-center w-full gap-4">
+      <div className="fixed bottom-6 flex gap-4 justify-center">
         <button
           onClick={addTeaSepoliaNetwork}
-          className="bg-yellow-500 text-black text-sm px-4 py-2 rounded-xl hover:bg-yellow-400 shadow-md"
+          className="bg-yellow-400 text-black px-4 py-2 rounded-xl text-sm hover:bg-yellow-300"
         >
-          Add Chain Tea Sepolia
+          Add Tea Sepolia
         </button>
-
         <a
           href="https://faucet-sepolia.tea.xyz/"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-purple-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-purple-500 shadow-md"
+          className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-purple-500"
         >
           Get TEA
         </a>
