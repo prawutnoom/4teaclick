@@ -47,7 +47,7 @@ export default function ClickToTxDApp() {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: "0x27DA", // 10218 ในเลขฐานสิบหก
+          chainId: "0x27EA", // 10218 ในเลขฐานสิบหก
           chainName: "Tea Sepolia Testnet",
           nativeCurrency: {
             name: "TEA",
