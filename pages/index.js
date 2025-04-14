@@ -47,14 +47,14 @@ export default function ClickToTxDApp() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0xaa37ec",
+            chainId: "10218",
             chainName: "Tea Sepolia",
             nativeCurrency: {
               name: "TEA",
               symbol: "TEA",
               decimals: 18
             },
-            rpcUrls: ["https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t"],
+            rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
             blockExplorerUrls: ["https://sepolia.explorer.tea.xyz"]
           }
         ]
