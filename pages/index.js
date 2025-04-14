@@ -128,7 +128,7 @@ export default function ClickToTxDApp() {
         </button>
 
         <a
-          href="https://sepolia.faucet.tea.xyz"
+          href="https://faucet-sepolia.tea.xyz/"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-purple-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-purple-500 shadow-md"
