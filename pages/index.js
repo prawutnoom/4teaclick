@@ -4,12 +4,12 @@ import Image from "next/image";
 
 const contractABI = [
   {
-    "inputs": [],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
+    inputs: [],
+    name: "claim",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
 
 const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
@@ -20,13 +20,47 @@ export default function ClickToTxDApp() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
+  const [userCount, setUserCount] = useState(0);
 
+  // Load provider
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(web3Provider);
     }
+
+    // ดึงข้อมูลจาก localStorage
+    const storedData = JSON.parse(localStorage.getItem("tea_user_counter"));
+    const now = new Date();
+    const bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+
+    const currentDay = bangkokTime.toISOString().split("T")[0];
+    const currentHour = bangkokTime.getHours();
+
+    if (!storedData || storedData.date !== currentDay || currentHour >= 7 && storedData.reset !== currentDay) {
+      // เริ่มใหม่ทุก 7 โมงเช้า
+      localStorage.setItem(
+        "tea_user_counter",
+        JSON.stringify({ date: currentDay, reset: currentDay, count: 0 })
+      );
+      setUserCount(0);
+    } else {
+      setUserCount(storedData.count || 0);
+    }
   }, []);
+
+  const incrementUserCount = () => {
+    const storedData = JSON.parse(localStorage.getItem("tea_user_counter"));
+    const now = new Date();
+    const bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    const currentDay = bangkokTime.toISOString().split("T")[0];
+
+    if (storedData?.date === currentDay) {
+      const updated = { ...storedData, count: storedData.count + 1 };
+      localStorage.setItem("tea_user_counter", JSON.stringify(updated));
+      setUserCount(updated.count);
+    }
+  };
 
   const connectWallet = async () => {
     try {
@@ -36,35 +70,37 @@ export default function ClickToTxDApp() {
       const address = await signer.getAddress();
       setSigner(signer);
       setWalletAddress(address);
+
+      // เพิ่ม count user
+      incrementUserCount();
     } catch (err) {
       console.error("Wallet connection error:", err);
     }
   };
 
   const addTeaSepoliaNetwork = async () => {
-  try {
-    await window.ethereum.request({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId: "0x27EA", // 10218 ในเลขฐานสิบหก
-          chainName: "Tea Sepolia Testnet",
-          nativeCurrency: {
-            name: "TEA",
-            symbol: "TEA",
-            decimals: 18
+    try {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: "0x27EA",
+            chainName: "Tea Sepolia Testnet",
+            nativeCurrency: {
+              name: "TEA",
+              symbol: "TEA",
+              decimals: 18,
+            },
+            rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
+            blockExplorerUrls: ["https://sepolia.tea.xyz/"],
           },
-          rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
-          blockExplorerUrls: ["https://sepolia.tea.xyz/"]
-        }
-      ]
-    });
-    console.log("✅ Tea Sepolia Testnet added to MetaMask");
-  } catch (err) {
-    console.error("❌ Error adding Tea Sepolia Testnet:", err);
-  }
-};
-
+        ],
+      });
+      console.log("✅ Tea Sepolia Testnet added to MetaMask");
+    } catch (err) {
+      console.error("❌ Error adding Tea Sepolia Testnet:", err);
+    }
+  };
 
   const handleClickTx = async () => {
     if (!signer) return;
@@ -83,14 +119,10 @@ export default function ClickToTxDApp() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
-      {/* Connected Wallet Address ด้านบนสุด */}
       {walletAddress && (
-        <p className="text-green-300 text-sm mb-2">
-          Connected: {walletAddress}
-        </p>
+        <p className="text-green-300 text-sm mb-2">Connected: {walletAddress}</p>
       )}
 
-      {/* Heading */}
       <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
         Dapp Tea Protocol
       </h1>
@@ -103,11 +135,19 @@ export default function ClickToTxDApp() {
               className="w-[200px] h-[200px] bg-blue-500 hover:bg-blue-600 rounded-full text-white text-2xl font-bold shadow-xl flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "..." : "Let'go"}
+              {isLoading ? "..." : "Let's go"}
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
-                TX Hash: <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" className="underline">{txHash}</a>
+                TX Hash:{" "}
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  className="underline"
+                  rel="noreferrer"
+                >
+                  {txHash}
+                </a>
               </p>
             )}
           </>
@@ -138,6 +178,11 @@ export default function ClickToTxDApp() {
           Get TEA
         </a>
       </div>
+
+      {/* ✅ มุมขวาล่างนับ user */}
+      <div className="fixed bottom-6 right-6 text-xs text-white bg-black bg-opacity-50 px-3 py-1 rounded-md shadow">
+        แสดงจำนวนคน users/day: {userCount}
+      </div>
     </div>
-  ); // ← ❗ แก้ไขตรงนี้ ให้มี ); ปิด
+  );
 }
