@@ -26,7 +26,7 @@ const contractABI = [
 ];
 
 const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
-const RPC = "https://tea-sepolia.g.alchemy.com/v2/your_api_key"; // ← แก้เป็นของคุณ
+const RPC = "https://tea-sepolia.g.alchemy.com/public";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
