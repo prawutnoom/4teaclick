@@ -20,45 +20,39 @@ export default function ClickToTxDApp() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
-  const [userCount, setUserCount] = useState(0);
+  const [claimCount, setClaimCount] = useState(0);
 
-  // Load provider
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(web3Provider);
     }
 
-    // ดึงข้อมูลจาก localStorage
-    const storedData = JSON.parse(localStorage.getItem("tea_user_counter"));
+    const storedData = JSON.parse(localStorage.getItem("tea_claim_counter"));
     const now = new Date();
     const bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
 
     const currentDay = bangkokTime.toISOString().split("T")[0];
     const currentHour = bangkokTime.getHours();
 
-    if (!storedData || storedData.date !== currentDay || currentHour >= 7 && storedData.reset !== currentDay) {
-      // เริ่มใหม่ทุก 7 โมงเช้า
-      localStorage.setItem(
-        "tea_user_counter",
-        JSON.stringify({ date: currentDay, reset: currentDay, count: 0 })
-      );
-      setUserCount(0);
+    if (!storedData || storedData.date !== currentDay || (storedData.date === currentDay && storedData.reset !== currentDay && currentHour >= 7)) {
+      localStorage.setItem("tea_claim_counter", JSON.stringify({ date: currentDay, reset: currentDay, count: 0 }));
+      setClaimCount(0);
     } else {
-      setUserCount(storedData.count || 0);
+      setClaimCount(storedData.count || 0);
     }
   }, []);
 
-  const incrementUserCount = () => {
-    const storedData = JSON.parse(localStorage.getItem("tea_user_counter"));
+  const incrementClaimCount = () => {
+    const storedData = JSON.parse(localStorage.getItem("tea_claim_counter"));
     const now = new Date();
     const bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
     const currentDay = bangkokTime.toISOString().split("T")[0];
 
     if (storedData?.date === currentDay) {
       const updated = { ...storedData, count: storedData.count + 1 };
-      localStorage.setItem("tea_user_counter", JSON.stringify(updated));
-      setUserCount(updated.count);
+      localStorage.setItem("tea_claim_counter", JSON.stringify(updated));
+      setClaimCount(updated.count);
     }
   };
 
@@ -70,9 +64,6 @@ export default function ClickToTxDApp() {
       const address = await signer.getAddress();
       setSigner(signer);
       setWalletAddress(address);
-
-      // เพิ่ม count user
-      incrementUserCount();
     } catch (err) {
       console.error("Wallet connection error:", err);
     }
@@ -84,7 +75,7 @@ export default function ClickToTxDApp() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0x27EA",
+            chainId: "0x27EA", // 10218 in hex
             chainName: "Tea Sepolia Testnet",
             nativeCurrency: {
               name: "TEA",
@@ -110,6 +101,8 @@ export default function ClickToTxDApp() {
       const tx = await contract.claim();
       await tx.wait();
       setTxHash(tx.hash);
+
+      incrementClaimCount();
     } catch (err) {
       console.error("Transaction error:", err);
     } finally {
@@ -135,7 +128,7 @@ export default function ClickToTxDApp() {
               className="w-[200px] h-[200px] bg-blue-500 hover:bg-blue-600 rounded-full text-white text-2xl font-bold shadow-xl flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "..." : "Let's go"}
+              {isLoading ? "..." : "Let’s go"}
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
@@ -179,9 +172,9 @@ export default function ClickToTxDApp() {
         </a>
       </div>
 
-      {/* ✅ มุมขวาล่างนับ user */}
+      {/* ✅ แสดงจำนวนคน claim วันนี้ */}
       <div className="fixed bottom-6 right-6 text-xs text-white bg-black bg-opacity-50 px-3 py-1 rounded-md shadow">
-        แสดงจำนวนคน users/day: {userCount}
+        แสดงจำนวนคน claim วันนี้: {claimCount}
       </div>
     </div>
   );
