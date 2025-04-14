@@ -26,7 +26,7 @@ const contractABI = [
 ];
 
 const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
-const RPC = "https://tea-sepolia.g.alchemy.com/public";
+const RPC = "https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
