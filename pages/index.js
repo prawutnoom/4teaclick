@@ -84,18 +84,34 @@ export default function ClickToTxDApp() {
     setClaimCount(uniqueAddresses.size);
   };
 
-  const connectWallet = async () => {
+ const connectWallet = async () => {
+  try {
+    if (!provider) return;
+
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const address = await signer.getAddress();
+    setSigner(signer);
+    setWalletAddress(address);
+
+    // 🔁 พยายามสลับ chain ไปยัง Tea Sepolia
     try {
-      if (!provider) return;
-      await provider.send("eth_requestAccounts", []);
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      setSigner(signer);
-      setWalletAddress(address);
-    } catch (err) {
-      console.error("Wallet connection error:", err);
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x27EA" }],
+      });
+    } catch (switchError) {
+      // ถ้า chain ยังไม่มีใน Metamask ให้เพิ่มเข้าไป
+      if (switchError.code === 4902) {
+        await addTeaSepoliaNetwork();
+      } else {
+        console.error("❌ Switch chain error:", switchError);
+      }
     }
-  };
+  } catch (err) {
+    console.error("Wallet connection error:", err);
+  }
+};
 
   const addTeaSepoliaNetwork = async () => {
     try {
