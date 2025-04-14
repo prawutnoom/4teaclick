@@ -109,13 +109,7 @@ export default function ClickToTxDApp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-center text-white p-6 space-y-8">
-      <Image
-        src="/logo.png"
-        alt="Tea Protocol Logo"
-        width={150}
-        height={150}
-        className="rounded-3xl shadow-lg"
-      />
+      <HeroSection />
 
       <h1 className="text-4xl font-bold drop-shadow-lg text-center">Tea Protocol DApp</h1>
 
@@ -170,6 +164,21 @@ export default function ClickToTxDApp() {
           Get TEA
         </a>
       </div>
+    </div>
+  );
+}
+
+function HeroSection() {
+  return (
+    <div className="flex flex-col items-center">
+      <Image
+        src="/image.png"
+        alt="Click Logo"
+        width={250}
+        height={250}
+        className="rounded-xl shadow-2xl"
+      />
+      <h1 className="text-white text-4xl font-bold mt-4">Click DApp</h1>
     </div>
   );
 }
