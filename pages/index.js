@@ -34,52 +34,21 @@ export default function ClickToTxDApp() {
   const [walletAddress, setWalletAddress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
-  const [claimCount, setClaimCount] = useState(0);
   const [userClickCount, setUserClickCount] = useState(0);
+  const [intervalId, setIntervalId] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(web3Provider);
     }
-
-    fetchClaimCountToday();
   }, []);
 
-  const getStartOfDayTimestamp = () => {
-    const now = new Date();
-    const bangkok = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-    bangkok.setHours(7, 0, 0, 0);
-    return Math.floor(bangkok.getTime() / 1000);
-  };
-
-  const fetchClaimCountToday = async () => {
-    const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
-    const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
-    const targetTimestamp = getStartOfDayTimestamp();
-    const latestBlock = await rpcProvider.getBlockNumber();
-
-    let fromBlock = latestBlock - 5000;
-    let found = false;
-
-    while (!found && fromBlock < latestBlock) {
-      const block = await rpcProvider.getBlock(fromBlock);
-      if (block.timestamp >= targetTimestamp) {
-        found = true;
-        break;
-      }
-      fromBlock += 50;
-    }
-
-    const logs = await contract.queryFilter("Claimed", fromBlock, "latest");
-    const uniqueAddresses = new Set();
-
-    logs.forEach((log) => {
-      uniqueAddresses.add(log.args.user.toLowerCase());
-    });
-
-    setClaimCount(uniqueAddresses.size);
-  };
+  useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [intervalId]);
 
   const fetchUserClickCount = async (userAddress) => {
     if (!userAddress) return;
@@ -104,7 +73,6 @@ export default function ClickToTxDApp() {
       setSigner(signer);
       setWalletAddress(address);
 
-      // สลับไป Tea Sepolia
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
@@ -118,7 +86,14 @@ export default function ClickToTxDApp() {
         }
       }
 
+      // โหลดจำนวน clicks ครั้งแรก
       fetchUserClickCount(address);
+
+      // ตั้ง interval ให้โหลดใหม่ทุก 15 วินาที
+      const id = setInterval(() => {
+        fetchUserClickCount(address);
+      }, 15000);
+      setIntervalId(id);
     } catch (err) {
       console.error("Wallet connection error:", err);
     }
@@ -157,7 +132,6 @@ export default function ClickToTxDApp() {
       await tx.wait();
       setTxHash(tx.hash);
 
-      fetchClaimCountToday();
       fetchUserClickCount(walletAddress);
     } catch (err) {
       console.error("Transaction error:", err);
@@ -231,10 +205,6 @@ export default function ClickToTxDApp() {
         >
           Get TEA
         </a>
-      </div>
-
-      <div className="fixed bottom-6 right-6 text-xs text-white bg-black bg-opacity-50 px-3 py-1 rounded-md shadow">
-        แสดงจำนวนคน claim วันนี้: {claimCount}
       </div>
     </div>
   );
