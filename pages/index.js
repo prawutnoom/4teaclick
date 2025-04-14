@@ -117,13 +117,23 @@ export default function ClickToTxDApp() {
         {walletAddress ? (
           <>
             <p className="text-green-400 text-sm">Connected: {walletAddress}</p>
+
             <button
               onClick={handleClickTx}
-              className="w-48 h-48 bg-teal-500 hover:bg-teal-600 rounded-full text-xl font-bold shadow-lg flex items-center justify-center"
+              className="relative w-48 h-48 rounded-full overflow-hidden shadow-lg flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "..." : "CLICK"}
+              <Image
+                src="/click.png"
+                alt="Tea Click"
+                fill
+                className="object-cover"
+              />
+              <span className="absolute text-white font-bold text-xl">
+                {isLoading ? "..." : "CLICK"}
+              </span>
             </button>
+
             {txHash && (
               <p className="mt-2 text-sm text-blue-300">
                 TX:{" "}
