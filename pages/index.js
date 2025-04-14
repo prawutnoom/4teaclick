@@ -1,8 +1,32 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Image from "next/image";
-import { contractAddress, contractABI } from "../lib/config";
-import { fetchClaimCountToday } from "../lib/claimUtils";
+
+const contractABI = [
+  {
+    inputs: [],
+    name: "claim",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "Claimed",
+    type: "event",
+  },
+];
+
+const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
+const RPC = "https://tea-sepolia.g.alchemy.com/public";
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
@@ -12,14 +36,53 @@ export default function ClickToTxDApp() {
   const [txHash, setTxHash] = useState(null);
   const [claimCount, setClaimCount] = useState(0);
 
+  // ✅ เชื่อม Metamask
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
       setProvider(web3Provider);
     }
 
-    fetchClaimCountToday(setClaimCount);
+    fetchClaimCountToday();
   }, []);
+
+  // ✅ ฟังก์ชันหา timestamp 7 โมงเช้าเวลาไทย
+  const getStartOfDayTimestamp = () => {
+    const now = new Date();
+    const bangkok = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    bangkok.setHours(7, 0, 0, 0);
+    return Math.floor(bangkok.getTime() / 1000);
+  };
+
+  // ✅ อ่านจำนวนคน claim วันนี้จาก on-chain
+  const fetchClaimCountToday = async () => {
+    const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
+    const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
+    const targetTimestamp = getStartOfDayTimestamp();
+    const latestBlock = await rpcProvider.getBlockNumber();
+
+    let fromBlock = latestBlock - 5000; // ตรวจย้อนหลัง ~5000 บล็อก
+    let found = false;
+
+    // ค้นหาบล็อกเริ่มต้นหลังเวลา 7 โมง
+    while (!found && fromBlock < latestBlock) {
+      const block = await rpcProvider.getBlock(fromBlock);
+      if (block.timestamp >= targetTimestamp) {
+        found = true;
+        break;
+      }
+      fromBlock += 50;
+    }
+
+    const logs = await contract.queryFilter("Claimed", fromBlock, "latest");
+    const uniqueAddresses = new Set();
+
+    logs.forEach((log) => {
+      uniqueAddresses.add(log.args.user.toLowerCase());
+    });
+
+    setClaimCount(uniqueAddresses.size);
+  };
 
   const connectWallet = async () => {
     try {
@@ -52,8 +115,9 @@ export default function ClickToTxDApp() {
           },
         ],
       });
+      console.log("✅ Tea Sepolia Testnet added to MetaMask");
     } catch (err) {
-      console.error("Error adding Tea Sepolia:", err);
+      console.error("❌ Error adding Tea Sepolia Testnet:", err);
     }
   };
 
@@ -65,7 +129,9 @@ export default function ClickToTxDApp() {
       const tx = await contract.claim();
       await tx.wait();
       setTxHash(tx.hash);
-      fetchClaimCountToday(setClaimCount);
+
+      // Refresh claim count after claim success
+      fetchClaimCountToday();
     } catch (err) {
       console.error("Transaction error:", err);
     } finally {
@@ -95,7 +161,15 @@ export default function ClickToTxDApp() {
             </button>
             {txHash && (
               <p className="mt-2 text-sm text-green-400">
-                TX Hash: <a href={`https://sepolia.etherscan.io/tx/${txHash}`} target="_blank" rel="noreferrer" className="underline">{txHash}</a>
+                TX Hash:{" "}
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  className="underline"
+                  rel="noreferrer"
+                >
+                  {txHash}
+                </a>
               </p>
             )}
           </>
@@ -116,6 +190,7 @@ export default function ClickToTxDApp() {
         >
           Add Chain Tea Sepolia
         </button>
+
         <a
           href="https://faucet-sepolia.tea.xyz/"
           target="_blank"
@@ -126,6 +201,7 @@ export default function ClickToTxDApp() {
         </a>
       </div>
 
+      {/* ✅ มุมขวาล่างนับ claim วันนี้ */}
       <div className="fixed bottom-6 right-6 text-xs text-white bg-black bg-opacity-50 px-3 py-1 rounded-md shadow">
         แสดงจำนวนคน claim วันนี้: {claimCount}
       </div>
