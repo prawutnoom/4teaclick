@@ -42,27 +42,29 @@ export default function ClickToTxDApp() {
   };
 
   const addTeaSepoliaNetwork = async () => {
-    try {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [
-          {
-            chainId: "10218",
-            chainName: "Tea Sepolia",
-            nativeCurrency: {
-              name: "TEA",
-              symbol: "TEA",
-              decimals: 18
-            },
-            rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
-            blockExplorerUrls: ["https://sepolia.explorer.tea.xyz"]
-          }
-        ]
-      });
-    } catch (err) {
-      console.error("Add chain error:", err);
-    }
-  };
+  try {
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: "0x27DA", // 10218 ในเลขฐานสิบหก
+          chainName: "Tea Sepolia Testnet",
+          nativeCurrency: {
+            name: "TEA",
+            symbol: "TEA",
+            decimals: 18
+          },
+          rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
+          blockExplorerUrls: ["https://sepolia.tea.xyz/"]
+        }
+      ]
+    });
+    console.log("✅ Tea Sepolia Testnet added to MetaMask");
+  } catch (err) {
+    console.error("❌ Error adding Tea Sepolia Testnet:", err);
+  }
+};
+
 
   const handleClickTx = async () => {
     if (!signer) return;
