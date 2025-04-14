@@ -35,8 +35,8 @@ export default function ClickToTxDApp() {
   const [isLoading, setIsLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
   const [claimCount, setClaimCount] = useState(0);
+  const [userClickCount, setUserClickCount] = useState(0);
 
-  // ✅ เชื่อม Metamask
   useEffect(() => {
     if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
       const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -46,7 +46,6 @@ export default function ClickToTxDApp() {
     fetchClaimCountToday();
   }, []);
 
-  // ✅ ฟังก์ชันหา timestamp 7 โมงเช้าเวลาไทย
   const getStartOfDayTimestamp = () => {
     const now = new Date();
     const bangkok = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
@@ -54,17 +53,15 @@ export default function ClickToTxDApp() {
     return Math.floor(bangkok.getTime() / 1000);
   };
 
-  // ✅ อ่านจำนวนคน claim วันนี้จาก on-chain
   const fetchClaimCountToday = async () => {
     const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
     const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
     const targetTimestamp = getStartOfDayTimestamp();
     const latestBlock = await rpcProvider.getBlockNumber();
 
-    let fromBlock = latestBlock - 5000; // ตรวจย้อนหลัง ~5000 บล็อก
+    let fromBlock = latestBlock - 5000;
     let found = false;
 
-    // ค้นหาบล็อกเริ่มต้นหลังเวลา 7 โมง
     while (!found && fromBlock < latestBlock) {
       const block = await rpcProvider.getBlock(fromBlock);
       if (block.timestamp >= targetTimestamp) {
@@ -84,34 +81,48 @@ export default function ClickToTxDApp() {
     setClaimCount(uniqueAddresses.size);
   };
 
- const connectWallet = async () => {
-  try {
-    if (!provider) return;
+  const fetchUserClickCount = async (userAddress) => {
+    if (!userAddress) return;
+    const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
+    const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
+    const logs = await contract.queryFilter("Claimed", 0, "latest");
 
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress();
-    setSigner(signer);
-    setWalletAddress(address);
+    const userLogs = logs.filter(
+      (log) => log.args.user.toLowerCase() === userAddress.toLowerCase()
+    );
 
-    // 🔁 พยายามสลับ chain ไปยัง Tea Sepolia
+    setUserClickCount(userLogs.length);
+  };
+
+  const connectWallet = async () => {
     try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x27EA" }],
-      });
-    } catch (switchError) {
-      // ถ้า chain ยังไม่มีใน Metamask ให้เพิ่มเข้าไป
-      if (switchError.code === 4902) {
-        await addTeaSepoliaNetwork();
-      } else {
-        console.error("❌ Switch chain error:", switchError);
+      if (!provider) return;
+
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      setSigner(signer);
+      setWalletAddress(address);
+
+      // สลับไป Tea Sepolia
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: "0x27EA" }],
+        });
+      } catch (switchError) {
+        if (switchError.code === 4902) {
+          await addTeaSepoliaNetwork();
+        } else {
+          console.error("❌ Switch chain error:", switchError);
+        }
       }
+
+      fetchUserClickCount(address);
+    } catch (err) {
+      console.error("Wallet connection error:", err);
     }
-  } catch (err) {
-    console.error("Wallet connection error:", err);
-  }
-};
+  };
 
   const addTeaSepoliaNetwork = async () => {
     try {
@@ -146,8 +157,8 @@ export default function ClickToTxDApp() {
       await tx.wait();
       setTxHash(tx.hash);
 
-      // Refresh claim count after claim success
       fetchClaimCountToday();
+      fetchUserClickCount(walletAddress);
     } catch (err) {
       console.error("Transaction error:", err);
     } finally {
@@ -158,7 +169,12 @@ export default function ClickToTxDApp() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-blue-400 p-6 space-y-6">
       {walletAddress && (
-        <p className="text-green-300 text-sm mb-2">Connected: {walletAddress}</p>
+        <>
+          <p className="text-green-300 text-sm mb-2">Connected: {walletAddress}</p>
+          <p className="text-sm text-white">
+            Your Clicks: <span className="text-cyan-300 font-semibold">{userClickCount}</span>
+          </p>
+        </>
       )}
 
       <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 drop-shadow-lg">
@@ -179,7 +195,7 @@ export default function ClickToTxDApp() {
               <p className="mt-2 text-sm text-green-400">
                 TX Hash:{" "}
                 <a
-                  href={`https://sepolia.tea.xyz//tx/${txHash}`}
+                  href={`https://sepolia.tea.xyz/tx/${txHash}`}
                   target="_blank"
                   className="underline"
                   rel="noreferrer"
@@ -217,7 +233,6 @@ export default function ClickToTxDApp() {
         </a>
       </div>
 
-      {/* ✅ มุมขวาล่างนับ claim วันนี้ */}
       <div className="fixed bottom-6 right-6 text-xs text-white bg-black bg-opacity-50 px-3 py-1 rounded-md shadow">
         แสดงจำนวนคน claim วันนี้: {claimCount}
       </div>
