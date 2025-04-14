@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import Image from "next/image";
 
 const contractABI = [
   {
@@ -26,7 +25,7 @@ const contractABI = [
 ];
 
 const contractAddress = "0x854bab28e45bf6c06c9802c3f1eadf96bcb1a3eb";
-const RPC = "https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t";
+const RPC = "https://tea-sepolia.g.alchemy.com/v2/0qiY9LelIcif8b0uECA5nFbWeTDvsU3t"; // ใส่ของคุณแทน
 
 export default function ClickToTxDApp() {
   const [provider, setProvider] = useState(null);
@@ -52,15 +51,28 @@ export default function ClickToTxDApp() {
 
   const fetchUserClickCount = async (userAddress) => {
     if (!userAddress) return;
+
     const rpcProvider = new ethers.providers.JsonRpcProvider(RPC);
     const contract = new ethers.Contract(contractAddress, contractABI, rpcProvider);
-    const logs = await contract.queryFilter("Claimed", 0, "latest");
 
-    const userLogs = logs.filter(
-      (log) => log.args.user.toLowerCase() === userAddress.toLowerCase()
-    );
+    try {
+      const latestBlock = await rpcProvider.getBlockNumber();
+      const fromBlock = Math.max(latestBlock - 5000, 0);
 
-    setUserClickCount(userLogs.length);
+      const logs = await contract.queryFilter("Claimed", fromBlock, "latest");
+
+      console.log("🧾 logs.length =", logs.length);
+
+      const userLogs = logs.filter(
+        (log) => log.args.user.toLowerCase() === userAddress.toLowerCase()
+      );
+
+      console.log("🙋‍♂️ userLogs.length =", userLogs.length);
+
+      setUserClickCount(userLogs.length);
+    } catch (err) {
+      console.error("❌ Error fetching click count:", err);
+    }
   };
 
   const connectWallet = async () => {
@@ -86,10 +98,8 @@ export default function ClickToTxDApp() {
         }
       }
 
-      // โหลดจำนวน clicks ครั้งแรก
       fetchUserClickCount(address);
 
-      // ตั้ง interval ให้โหลดใหม่ทุก 15 วินาที
       const id = setInterval(() => {
         fetchUserClickCount(address);
       }, 15000);
@@ -112,14 +122,13 @@ export default function ClickToTxDApp() {
               symbol: "TEA",
               decimals: 18,
             },
-            rpcUrls: ["https://tea-sepolia.g.alchemy.com/public"],
+            rpcUrls: [RPC],
             blockExplorerUrls: ["https://sepolia.tea.xyz/"],
           },
         ],
       });
-      console.log("✅ Tea Sepolia Testnet added to MetaMask");
     } catch (err) {
-      console.error("❌ Error adding Tea Sepolia Testnet:", err);
+      console.error("❌ Add network error:", err);
     }
   };
 
@@ -131,10 +140,9 @@ export default function ClickToTxDApp() {
       const tx = await contract.claim();
       await tx.wait();
       setTxHash(tx.hash);
-
       fetchUserClickCount(walletAddress);
     } catch (err) {
-      console.error("Transaction error:", err);
+      console.error("❌ Transaction error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -171,8 +179,8 @@ export default function ClickToTxDApp() {
                 <a
                   href={`https://sepolia.tea.xyz/tx/${txHash}`}
                   target="_blank"
-                  className="underline"
                   rel="noreferrer"
+                  className="underline"
                 >
                   {txHash}
                 </a>
