@@ -108,19 +108,25 @@ export default function ClickToTxDApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-start text-white px-6 pt-10 space-y-6">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 flex flex-col items-center justify-start px-6 pt-10 space-y-6">
       <HeroSection />
 
-      <h1 className="text-4xl font-bold text-white">Tea Protocol DApp</h1>
+      <h1 className="text-4xl font-bold text-white drop-shadow-[0_0_10px_#00ffe0]">Tea Protocol DApp</h1>
 
-    {!walletAddress && (
-  <button
-    onClick={connectWallet}
-    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm"
-  >
-    Connect Wallet
-  </button>
-)}
+      {walletAddress && (
+        <p className="text-green-400 text-sm text-center break-all drop-shadow-[0_0_10px_#00ffe0]">
+          Connected: {walletAddress}
+        </p>
+      )}
+
+      {!walletAddress && (
+        <button
+          onClick={connectWallet}
+          className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white px-8 py-4 rounded-2xl text-xl font-bold shadow-lg transition-all duration-300 transform hover:scale-105"
+        >
+          <span className="drop-shadow-[0_0_10px_#00ffe0]">Connect Wallet</span>
+        </button>
+      )}
 
       <div className="flex flex-col items-center justify-center mt-6 mb-12">
         {walletAddress && (
@@ -135,17 +141,17 @@ export default function ClickToTxDApp() {
               fill
               className="object-cover"
             />
-            <span className="absolute text-white font-extrabold text-3xl tracking-wider drop-shadow-[0_0_8px_#00ffcc]">
+            <span className="absolute text-white font-extrabold text-3xl tracking-wider drop-shadow-[0_0_10px_#00ffe0]">
               {isLoading ? "..." : "CLICK"}
             </span>
           </button>
         )}
 
         {txHash && (
-          <p className="mt-2 text-sm text-blue-300">
-            TX:{" "}
+          <p className="mt-2 text-sm text-blue-300 drop-shadow-[0_0_10px_#00ffe0]">
+            TX: {" "}
             <a
-              href={`https://sepolia.tea.xyz/tx/${txHash}`}
+              href={https://sepolia.tea.xyz/tx/${txHash}}
               target="_blank"
               rel="noreferrer"
               className="underline"
@@ -156,7 +162,6 @@ export default function ClickToTxDApp() {
         )}
       </div>
 
-      {/* Bottom Buttons */}
       <div className="fixed bottom-6 flex gap-4 justify-center">
         <button
           onClick={addTeaSepoliaNetwork}
@@ -181,13 +186,13 @@ function HeroSection() {
   return (
     <div className="flex flex-col items-center">
       <Image
-        src="/image.png"
+        src="/welcome.png"
         alt="Click Logo"
-        width={250}
-        height={250}
+        width={500}
+        height={200}
         className="rounded-xl shadow-2xl"
       />
-      <h1 className="text-white text-4xl font-bold mt-4">Click DApp</h1>
+      <h1 className="text-white text-4xl font-bold mt-4 drop-shadow-[0_0_10px_#00ffe0]">Click DApp</h1>
     </div>
   );
-}
+}  
