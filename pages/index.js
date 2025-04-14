@@ -136,13 +136,13 @@ export default function ClickToTxDApp() {
             disabled={isLoading}
           >
             <Image
-              src="/click.png"
+              src="/Clickk.png"
               alt="Tea Click"
               fill
               className="object-cover"
             />
             <span className="absolute text-white font-extrabold text-3xl tracking-wider drop-shadow-[0_0_10px_#00ffe0]">
-              {isLoading ? "..." : "CLICK"}
+              {isLoading ? "..." : "Click"}
             </span>
           </button>
         )}
