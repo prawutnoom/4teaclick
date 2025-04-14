@@ -113,11 +113,14 @@ export default function ClickToTxDApp() {
 
       <h1 className="text-4xl font-bold text-white">Tea Protocol DApp</h1>
 
-      {walletAddress && (
-        <p className="text-green-400 text-sm text-center break-all">
-          Connected: {walletAddress}
-        </p>
-      )}
+    {!walletAddress && (
+  <button
+    onClick={connectWallet}
+    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm"
+  >
+    Connect Wallet
+  </button>
+)}
 
       <div className="flex flex-col items-center justify-center mt-6 mb-12">
         {walletAddress && (
